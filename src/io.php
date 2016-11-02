@@ -7,52 +7,73 @@ class io
 
     private static $stream = null; // defaults to STDOUT in CLI mode
 
-    private static $progressBarDefaults = [
-        'length' => 20,
-        'last'   => '',
+    private static $defaults = [
+
+        'format'  => '%s',
+        'total'   => 0,
+        'current' => 1,
+        'last'    => '',
+
     ];
 
-    private static $progressBarOptions = null;
+    private static $percentageDefaults = [
 
-    private static $progressDefaults = [
         'decimals' => 0,
-        'last'     => '',
+
     ];
 
-    private static $progressOptions;
+    private static $barDefaults = [
+
+        'format'   => '[%s]',
+        'length'   => 20,
+        'fillChar' => '-',
+
+    ];
+
+    private static $options;
 
     public static function newProgressBar( array $options = [ ] )
     {
-        self::$progressBarOptions = array_merge( self::$progressBarDefaults, $options );
+        self::$options = array_merge( self::$defaults, self::$barDefaults, $options );
     }
 
-    public static function updateProgressBar( $iTotal, $iCurrent, $format = '[%s]' )
+    public static function updateProgressBar( $iTotal = null, $iCurrent = null, $format = null )
     {
-        $position = ceil( self::$progressBarOptions[ 'length' ] * $iCurrent / $iTotal );
-        self::$progressBarOptions[ 'last' ]
-            = $output
-            = ( self::getCarriageReturn( self::$progressBarOptions[ 'last' ] )
-            . sprintf( $format, str_pad( str_repeat( '-', $position ), self::$progressBarOptions[ 'length' ], ' ' ) ) );
-        self::output( $output, $iTotal == $iCurrent );
+        is_null( $iTotal ) && ( $iTotal = self::$options[ 'total' ] );
+        is_null( $iCurrent ) && ( $iCurrent = self::$options[ 'current' ]++ );
+        is_null( $format ) && ( $format = self::$options[ 'format' ] );
+        $position = ceil( self::$options[ 'length' ] * $iCurrent / ( (int)$iTotal ?: 1 ) );
+        $cr = self::getCarriageReturn( self::$options[ 'last' ] );
+        self::$options[ 'last' ] = sprintf( $format, str_pad( str_repeat( self::$options[ 'fillChar' ], $position ), self::$options[ 'length' ], ' ' ) );
+        self::output( $cr . self::$options[ 'last' ], $iTotal == $iCurrent );
+
+//        self::$options[ 'last' ]
+//            = $output
+//            = ( self::getCarriageReturn( self::$options[ 'last' ] )
+//            . sprintf( $format, str_pad( str_repeat( self::$options[ 'fillChar' ], $position ), self::$options[ 'length' ], ' ' ) ) );
+//        self::output( $output, $iTotal == $iCurrent );
     }
 
     public static function newProgressPercentage( array $options = [ ] )
     {
-        self::$progressOptions = array_merge( self::$progressDefaults, $options );
+        self::$options = array_merge( self::$defaults, self::$percentageDefaults, $options );
     }
 
-    public static function updateProgressPercentage( $iTotal, $iCurrent, $format = '%s' )
+    public static function updateProgressPercentage( $iTotal = null, $iCurrent = null, $format = null )
     {
-        $position = self::getProgressPercentage( $iTotal, $iCurrent, self::$progressOptions[ 'decimals' ] );
-        $cr = self::getCarriageReturn( self::$progressOptions[ 'last' ] );
-        self::$progressOptions[ 'last' ] = sprintf( $format, $position );
-        self::output( $cr . self::$progressOptions[ 'last' ], $iTotal == $iCurrent );
+        is_null( $iTotal ) && ( $iTotal = self::$options[ 'total' ] );
+        is_null( $iCurrent ) && ( $iCurrent = self::$options[ 'current' ]++ );
+        is_null( $format ) && ( $format = self::$options[ 'format' ] );
+        $position = self::getProgressPercentage( $iTotal, $iCurrent, self::$options[ 'decimals' ] );
+        $cr = self::getCarriageReturn( self::$options[ 'last' ] );
+        self::$options[ 'last' ] = sprintf( $format, $position );
+        self::output( $cr . self::$options[ 'last' ], $iTotal == $iCurrent );
     }
 
     private static function getCarriageReturn( $str )
     {
         return
-            self::getStream() === STDOUT ? ( ( $str ? sprintf( "\x1B[%uD", strlen( $str ) ) : '' ) . "\x1B[K" ) :
+            self::getStream() === STDOUT ? ( ( $str ? sprintf( "\x1B[%uD", mb_strlen( $str ) ) : '' ) . "\x1B[K" ) :
                 str_repeat( chr( 8 ), strlen( $str ) ) . "\x1B[K";
     }
 
@@ -105,7 +126,6 @@ class io
 
     public static function confirm( $question, array $available_options = [ 'y', 'n' ], $confirmation_option = 'y', $default_option = 'y' )
     {
-        if( !empty( $_GET[ 'cron_run' ] ) ) return 'y';
         // convert all answer options to lower case
         array_walk( $available_options, function( &$row ){ $row = strtolower( $row ); } );
         $confirmation_option = strtolower( $confirmation_option );
