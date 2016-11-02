@@ -1,0 +1,16 @@
+{
+  "name": "alexbusu/php.io",
+  "description": "A tool to easily put progress bars on CLI",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Alexandru Busuioc",
+      "email": "busuioc.alexandru@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Phpio\\": "src/"
+    }
+  }
+}
