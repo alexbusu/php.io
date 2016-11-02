@@ -79,7 +79,7 @@ class io
 
     public static function getProgressPercentage( $iTotal, $iCurrent, $decimals = 0 )
     {
-        return number_format( 100 * $iCurrent / $iTotal, $decimals );
+        return number_format( 100 * $iCurrent / ( (int)$iTotal ?: 1 ), $decimals );
     }
 
     /**
