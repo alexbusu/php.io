@@ -19,7 +19,7 @@ class io
         'last'     => '',
     ];
 
-    public static $progressOptions;
+    private static $progressOptions;
 
     public static function newProgressBar( array $options = [ ] )
     {
