@@ -1,8 +1,8 @@
 <?php
 
-namespace Phpio;
+namespace Alexbusu;
 
-class io
+class Phpio
 {
 
     private static $stream = null; // defaults to STDOUT in CLI mode

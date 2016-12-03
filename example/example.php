@@ -1,8 +1,13 @@
 <?php
 
-require __DIR__ . '/../src/io.php';
+/*
+ * Run this file in CLI (Terminal)
+ * $ php example.php
+ */
 
-use Phpio\io;
+require __DIR__ . '/../src/Phpio.php';
+
+use Alexbusu\Phpio as io;
 
 $iterations = 123;
 
